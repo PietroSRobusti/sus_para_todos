@@ -8,14 +8,24 @@ import {
   insertNewsSchema,
   insertHealthRecordSchema,
 } from "@shared/schema";
+
 import { generateSpecialtyIcon, generateNewsImage } from "./openai-service";
+
 import {
   hashPassword,
   verifyPassword,
   validateStrongPassword,
   requireAuth,
+  requireAdmin,
 } from "./auth";
+
 import { z } from "zod";
+
+// --------------------------------------
+// Schemas auxiliares
+// --------------------------------------
+const partialHospitalSchema = insertHospitalSchema.partial();
+const partialHealthRecordSchema = insertHealthRecordSchema.partial();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   //
@@ -23,6 +33,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // HOSPITAIS
   // ==========================
   //
+
+  // listar hospitais (aberto)
   app.get("/api/hospitals", async (_req, res) => {
     try {
       const hospitals = await storage.getHospitals();
@@ -32,6 +44,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // pegar hospital específico (aberto)
   app.get("/api/hospitals/:id", async (req, res) => {
     try {
       const hospital = await storage.getHospital(req.params.id);
@@ -44,13 +57,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/hospitals", async (req, res) => {
+  // criar hospital (ADMIN)
+  app.post("/api/hospitals", requireAdmin, async (req, res) => {
     try {
       const validated = insertHospitalSchema.parse(req.body);
       const hospital = await storage.createHospital(validated);
       res.status(201).json(hospital);
     } catch (error: any) {
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: error.errors[0].message });
+      }
       res.status(400).json({ error: error.message });
+    }
+  });
+
+  // atualizar hospital (ADMIN)
+  app.put("/api/hospitals/:id", requireAdmin, async (req, res) => {
+    try {
+      const validated = partialHospitalSchema.parse(req.body);
+
+      const updated = await storage.updateHospital(req.params.id, validated);
+
+      if (!updated) {
+        return res.status(404).json({ error: "Hospital não encontrado" });
+      }
+
+      res.json(updated);
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: error.errors[0].message });
+      }
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // deletar hospital (ADMIN)
+  app.delete("/api/hospitals/:id", requireAdmin, async (req, res) => {
+    try {
+      const existing = await storage.getHospital(req.params.id);
+      if (!existing) {
+        return res.status(404).json({ error: "Hospital não encontrado" });
+      }
+
+      await storage.deleteHospital(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 
@@ -72,9 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const specialty = await storage.getSpecialty(req.params.id);
       if (!specialty) {
-        return res
-          .status(404)
-          .json({ error: "Especialidade não encontrada" });
+        return res.status(404).json({ error: "Especialidade não encontrada" });
       }
       res.json(specialty);
     } catch (error: any) {
@@ -82,12 +132,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/specialties", async (req, res) => {
+  app.post("/api/specialties", requireAdmin, async (req, res) => {
     try {
       const validated = insertSpecialtySchema.parse(req.body);
       const specialty = await storage.createSpecialty(validated);
       res.status(201).json(specialty);
     } catch (error: any) {
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: error.errors[0].message });
+      }
       res.status(400).json({ error: error.message });
     }
   });
@@ -110,14 +163,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/appointments/:id", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
-      const appointment = await storage.getAppointment(
-        req.params.id,
-        userId
-      );
+      const appointment = await storage.getAppointment(req.params.id, userId);
       if (!appointment) {
-        return res
-          .status(404)
-          .json({ error: "Agendamento não encontrado" });
+        return res.status(404).json({ error: "Agendamento não encontrado" });
       }
       res.json(appointment);
     } catch (error: any) {
@@ -130,10 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.userId!;
       const validated = insertAppointmentSchema.parse(req.body);
 
-      const appointment = await storage.createAppointment(
-        validated,
-        userId
-      );
+      const appointment = await storage.createAppointment(validated, userId);
 
       console.log(
         "[POST /api/appointments] Appointment created successfully:",
@@ -159,9 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       if (!appointment) {
-        return res
-          .status(404)
-          .json({ error: "Agendamento não encontrado" });
+        return res.status(404).json({ error: "Agendamento não encontrado" });
       }
 
       const validated = insertAppointmentSchema.partial().parse(req.body);
@@ -179,10 +222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(updated);
     } catch (error: any) {
-      console.error(
-        "[PUT /api/appointments] Error:",
-        error.message
-      );
+      console.error("[PUT /api/appointments] Error:", error.message);
       res.status(400).json({ error: error.message });
     }
   });
@@ -195,9 +235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId
       );
       if (!appointment) {
-        return res
-          .status(404)
-          .json({ error: "Agendamento não encontrado" });
+        return res.status(404).json({ error: "Agendamento não encontrado" });
       }
 
       await storage.deleteAppointment(req.params.id, userId);
@@ -209,17 +247,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(204).send();
     } catch (error: any) {
-      console.error(
-        "[DELETE /api/appointments] Error:",
-        error.message
-      );
+      console.error("[DELETE /api/appointments] Error:", error.message);
       res.status(500).json({ error: error.message });
     }
   });
 
   //
   // ==========================
-  // REGISTROS DE SAÚDE (NOVO CRUD)
+  // REGISTROS DE SAÚDE (CRUD do paciente)
   // ==========================
   //
   app.get("/api/health-records", requireAuth, async (req, res) => {
@@ -228,29 +263,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const records = await storage.getHealthRecords(userId);
       res.json(records);
     } catch (error: any) {
-      console.error(
-        "[GET /api/health-records] Error:",
-        error.message
-      );
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  app.get("/api/health-records/:id", requireAuth, async (req, res) => {
-    try {
-      const userId = req.session.userId!;
-      const record = await storage.getHealthRecord(req.params.id, userId);
-      if (!record) {
-        return res
-          .status(404)
-          .json({ error: "Registro de saúde não encontrado" });
-      }
-      res.json(record);
-    } catch (error: any) {
-      console.error(
-        "[GET /api/health-records/:id] Error:",
-        error.message
-      );
       res.status(500).json({ error: error.message });
     }
   });
@@ -262,17 +274,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const created = await storage.createHealthRecord(validated, userId);
 
-      console.log(
-        "[POST /api/health-records] Record created successfully:",
-        created.id
-      );
-
       res.status(201).json(created);
     } catch (error: any) {
-      console.error(
-        "[POST /api/health-records] Validation error:",
-        error.message
-      );
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: JSON.stringify(error.errors, null, 2) });
+      }
       res.status(400).json({ error: error.message });
     }
   });
@@ -280,8 +286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/health-records/:id", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
-      // validação parcial (edição parcial)
-      const validated = insertHealthRecordSchema.partial().parse(req.body);
+      const validated = partialHealthRecordSchema.parse(req.body);
 
       const updated = await storage.updateHealthRecord(
         req.params.id,
@@ -290,22 +295,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       if (!updated) {
-        return res
-          .status(404)
-          .json({ error: "Registro de saúde não encontrado" });
+        return res.status(404).json({ error: "Registro não encontrado" });
       }
-
-      console.log(
-        "[PUT /api/health-records/:id] Record updated successfully:",
-        updated.id
-      );
 
       res.json(updated);
     } catch (error: any) {
-      console.error(
-        "[PUT /api/health-records/:id] Error:",
-        error.message
-      );
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: JSON.stringify(error.errors, null, 2) });
+      }
       res.status(400).json({ error: error.message });
     }
   });
@@ -313,28 +310,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/health-records/:id", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
-      const ok = await storage.deleteHealthRecord(
-        req.params.id,
-        userId
-      );
+
+      const ok = await storage.deleteHealthRecord(req.params.id, userId);
 
       if (!ok) {
-        return res
-          .status(404)
-          .json({ error: "Registro de saúde não encontrado" });
+        return res.status(404).json({ error: "Registro não encontrado" });
       }
-
-      console.log(
-        "[DELETE /api/health-records/:id] Record deleted successfully:",
-        req.params.id
-      );
 
       res.status(204).send();
     } catch (error: any) {
-      console.error(
-        "[DELETE /api/health-records/:id] Error:",
-        error.message
-      );
       res.status(500).json({ error: error.message });
     }
   });
@@ -367,17 +351,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/news", async (req, res) => {
+  app.post("/api/news", requireAdmin, async (req, res) => {
     try {
       const validated = insertNewsSchema.parse(req.body);
       const newsItem = await storage.createNews(validated);
       res.status(201).json(newsItem);
     } catch (error: any) {
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: error.errors[0].message });
+      }
       res.status(400).json({ error: error.message });
     }
   });
 
-  app.post("/api/specialties/:id/generate-image", async (req, res) => {
+  app.post("/api/specialties/:id/generate-image", requireAdmin, async (req, res) => {
     try {
       const specialty = await storage.getSpecialty(req.params.id);
       if (!specialty) {
@@ -396,7 +383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/news/:id/generate-image", async (req, res) => {
+  app.post("/api/news/:id/generate-image", requireAdmin, async (req, res) => {
     try {
       const newsItem = await storage.getNewsItem(req.params.id);
       if (!newsItem) {
@@ -424,7 +411,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==========================
   //
 
-  // schema de registro
   const registerSchema = z
     .object({
       name: z.string().min(1, "Nome é obrigatório"),
@@ -441,22 +427,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { name, email, password } = registerSchema.parse(req.body);
 
-      // valida força da senha
       const passwordValidation = validateStrongPassword(password);
       if (!passwordValidation.valid) {
-        return res
-          .status(400)
-          .json({
-            error: passwordValidation.errors.join(", "),
-          });
+        return res.status(400).json({
+          error: passwordValidation.errors.join(", "),
+        });
       }
 
-      // checa se já existe email
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res
-          .status(409)
-          .json({ error: "Email já cadastrado" });
+        return res.status(409).json({ error: "Email já cadastrado" });
       }
 
       const passwordHash = await hashPassword(password);
@@ -465,15 +445,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name,
         email,
         passwordHash,
-      });
+        // IMPORTANTE: quem se registra vira "user"
+        // admins devem ser promovidos manualmente via UPDATE no banco
+      } as any);
 
-      // cria sessão
       req.session.userId = user.id;
 
       res.status(201).json({
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
+        role: user.role,
       });
     } catch (error: any) {
       if (error.name === "ZodError") {
@@ -490,7 +473,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // schema de login
   const loginSchema = z.object({
     email: z.string().email("Email inválido"),
     password: z.string().min(1, "Senha é obrigatória"),
@@ -524,6 +506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        role: user.role, // <-- devolvemos role
       });
     } catch (error: any) {
       if (error.name === "ZodError") {
@@ -565,6 +548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        role: user.role, // <-- importante no front p/ saber se mostra tela admin
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -572,15 +556,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   //
-  // ATUALIZAÇÃO DE PERFIL
-  //
-  // Este endpoint permite:
-  // - atualizar telefone
-  // - atualizar email (se não estiver sendo usado)
-  // - trocar senha (exige senha atual e valida força da nova)
-  //
-  // O front do Profile.tsx pode chamar esse endpoint com { phone: "..." }
-  // sem precisar mandar senha, e isso vai atualizar só o telefone.
+  // Atualização de perfil (telefone/email/senha)
   //
   const updateProfileSchema = z
     .object({
@@ -592,7 +568,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
     .refine(
       (data) => {
-        // se quer trocar senha, precisa mandar currentPassword
         if (data.newPassword && !data.currentPassword) {
           return false;
         }
@@ -605,7 +580,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     )
     .refine(
       (data) => {
-        // se quer trocar senha, newPassword precisa bater com confirmPassword
         if (
           data.newPassword &&
           data.newPassword !== data.confirmPassword
@@ -624,7 +598,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session.userId!;
 
-      // valida body com zod
       const {
         email,
         phone,
@@ -632,7 +605,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         newPassword,
       } = updateProfileSchema.parse(req.body);
 
-      // carrega o usuário atual
       const user = await storage.getUserById(userId);
       if (!user) {
         return res
@@ -640,11 +612,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ error: "Usuário não encontrado" });
       }
 
-      //
-      // 1. Se tiver pedido troca de senha, valida
-      //
+      // se quer trocar senha
       if (newPassword) {
-        // exige senha atual correta
         const isValidPassword = await verifyPassword(
           currentPassword || "",
           user.passwordHash
@@ -655,7 +624,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .json({ error: "Senha atual incorreta" });
         }
 
-        // força de senha
         const passwordValidation =
           validateStrongPassword(newPassword);
         if (!passwordValidation.valid) {
@@ -668,11 +636,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateUserPassword(userId, passwordHash);
       }
 
-      //
-      // 2. Se trocar email, checa duplicidade
-      //
       const updateData: { email?: string; phone?: string } = {};
 
+      // se quer trocar email
       if (email && email !== user.email) {
         const existingUser = await storage.getUserByEmail(email);
         if (existingUser && existingUser.id !== userId) {
@@ -683,14 +649,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.email = email;
       }
 
-      //
-      // 3. Atualizar telefone SEM exigir senha
-      //
+      // atualizar phone sem exigir senha
       if (typeof phone !== "undefined") {
         updateData.phone = phone;
       }
 
-      // Se houver algo pra atualizar (email/phone)
       let updatedUser = user;
       if (Object.keys(updateData).length > 0) {
         updatedUser = await storage.updateUserProfile(
@@ -704,12 +667,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId
       );
 
-      // resposta padronizada pro front/Profile.tsx
       return res.json({
         id: updatedUser.id,
         name: updatedUser.name,
         email: updatedUser.email,
         phone: updatedUser.phone,
+        role: updatedUser.role,
       });
     } catch (error: any) {
       if (error.name === "ZodError") {
@@ -717,10 +680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .status(400)
           .json({ error: error.errors[0].message });
       }
-      console.error(
-        "[PUT /api/auth/profile] Error:",
-        error.message
-      );
+      console.error("[PUT /api/auth/profile] Error:", error.message);
       return res.status(500).json({
         error: error.message,
       });

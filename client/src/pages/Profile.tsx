@@ -205,20 +205,23 @@ export default function Profile() {
               Se você estiver usando um computador público, lembre-se de
               finalizar sua sessão.
             </p>
-            <form
-              action="/api/auth/logout"
-              method="post"
-              data-testid="logout-form"
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-11 text-base font-semibold"
+              data-testid="button-logout"
+              onClick={async () => {
+                try {
+                  await fetch("/api/auth/logout", { method: "POST" });
+                  window.location.href = "/login"; // Ajuste p/ redirecionar pra tela de login (antes quebrava a pagina)
+                } catch (err) {
+                  console.error("Erro ao sair:", err);
+                }
+              }}
             >
-              <Button
-                type="submit"
-                variant="outline"
-                className="w-full h-11 text-base font-semibold"
-                data-testid="button-logout"
-              >
-                Sair da conta
-              </Button>
-            </form>
+              Sair da conta
+            </Button>
+
           </CardContent>
         </Card>
       </div>

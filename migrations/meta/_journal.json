@@ -8,6 +8,13 @@
       "when": 1761879632497,
       "tag": "0000_sad_hellcat",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1761946155318,
+      "tag": "0001_nappy_blue_blade",
+      "breakpoints": true
     }
   ]
 }
