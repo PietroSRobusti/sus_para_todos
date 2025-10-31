@@ -26,6 +26,8 @@ export interface IStorage {
   getHospitals(): Promise<Hospital[]>;
   getHospital(id: string): Promise<Hospital | undefined>;
   createHospital(hospital: InsertHospital): Promise<Hospital>;
+  updateHospital(id: string, data: { name?: string; address?: string; phone?: string }): Promise<Hospital | undefined>;
+  deleteHospital(id: string): Promise<void>;
 
   // ESPECIALIDADES
   getSpecialties(): Promise<Specialty[]>;
@@ -54,22 +56,18 @@ export interface IStorage {
   updateUserPassword(id: string, passwordHash: string): Promise<void>;
   updateUserProfile(id: string, data: { email?: string; phone?: string }): Promise<User>;
 
-  // REGISTROS DE SAÚDE (novo CRUD)
+  // REGISTROS DE SAÚDE
   getHealthRecords(userId: string): Promise<HealthRecord[]>;
   getHealthRecord(id: string, userId: string): Promise<HealthRecord | undefined>;
   createHealthRecord(data: InsertHealthRecord, userId: string): Promise<HealthRecord>;
-  updateHealthRecord(
-    id: string,
-    data: Partial<InsertHealthRecord>,
-    userId: string
-  ): Promise<HealthRecord | undefined>;
+  updateHealthRecord(id: string, data: Partial<InsertHealthRecord>, userId: string): Promise<HealthRecord | undefined>;
   deleteHealthRecord(id: string, userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
-  // ============
+  // =====================
   // HOSPITAIS
-  // ============
+  // =====================
   async getHospitals(): Promise<Hospital[]> {
     return await db.select().from(hospitals);
   }
@@ -84,18 +82,31 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  // ============
+  async updateHospital(
+    id: string,
+    data: { name?: string; address?: string; phone?: string }
+  ): Promise<Hospital | undefined> {
+    const result = await db
+      .update(hospitals)
+      .set(data)
+      .where(eq(hospitals.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteHospital(id: string): Promise<void> {
+    await db.delete(hospitals).where(eq(hospitals.id, id));
+  }
+
+  // =====================
   // ESPECIALIDADES
-  // ============
+  // =====================
   async getSpecialties(): Promise<Specialty[]> {
     return await db.select().from(specialties);
   }
 
   async getSpecialty(id: string): Promise<Specialty | undefined> {
-    const result = await db
-      .select()
-      .from(specialties)
-      .where(eq(specialties.id, id));
+    const result = await db.select().from(specialties).where(eq(specialties.id, id));
     return result[0];
   }
 
@@ -105,26 +116,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateSpecialtyImage(id: string, imageUrl: string): Promise<void> {
-    await db
-      .update(specialties)
-      .set({ imageUrl })
-      .where(eq(specialties.id, id));
+    await db.update(specialties).set({ imageUrl }).where(eq(specialties.id, id));
   }
 
-  // ============
+  // =====================
   // AGENDAMENTOS
-  // ============
+  // =====================
   async getAppointments(userId: string): Promise<Appointment[]> {
-    return await db
-      .select()
-      .from(appointments)
-      .where(eq(appointments.userId, userId));
+    return await db.select().from(appointments).where(eq(appointments.userId, userId));
   }
 
-  async getAppointment(
-    id: string,
-    userId: string
-  ): Promise<Appointment | undefined> {
+  async getAppointment(id: string, userId: string): Promise<Appointment | undefined> {
     const result = await db
       .select()
       .from(appointments)
@@ -132,10 +134,7 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async getAppointmentsByDate(
-    date: Date,
-    userId: string
-  ): Promise<Appointment[]> {
+  async getAppointmentsByDate(date: Date, userId: string): Promise<Appointment[]> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
@@ -144,22 +143,11 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(appointments)
-      .where(
-        and(
-          gte(appointments.appointmentDate, startOfDay),
-          eq(appointments.userId, userId)
-        )
-      );
+      .where(and(gte(appointments.appointmentDate, startOfDay), eq(appointments.userId, userId)));
   }
 
-  async createAppointment(
-    appointment: InsertAppointment,
-    userId: string
-  ): Promise<Appointment> {
-    const result = await db
-      .insert(appointments)
-      .values({ ...appointment, userId })
-      .returning();
+  async createAppointment(appointment: InsertAppointment, userId: string): Promise<Appointment> {
+    const result = await db.insert(appointments).values({ ...appointment, userId }).returning();
     return result[0];
   }
 
@@ -177,19 +165,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteAppointment(id: string, userId: string): Promise<void> {
-    await db
-      .delete(appointments)
-      .where(and(eq(appointments.id, id), eq(appointments.userId, userId)));
+    await db.delete(appointments).where(and(eq(appointments.id, id), eq(appointments.userId, userId)));
   }
 
-  // ============
+  // =====================
   // NOTÍCIAS
-  // ============
+  // =====================
   async getNews(): Promise<News[]> {
-    return await db
-      .select()
-      .from(news)
-      .orderBy(sql`${news.publishedAt} DESC`);
+    return await db.select().from(news).orderBy(sql`${news.publishedAt} DESC`);
   }
 
   async getNewsItem(id: string): Promise<News | undefined> {
@@ -206,19 +189,16 @@ export class DatabaseStorage implements IStorage {
     await db.update(news).set({ imageUrl }).where(eq(news.id, id));
   }
 
-  // ============
+  // =====================
   // USUÁRIOS
-  // ============
+  // =====================
   async createUser(user: InsertUser): Promise<User> {
     const result = await db.insert(users).values(user).returning();
     return result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const result = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email));
+    const result = await db.select().from(users).where(eq(users.email, email));
     return result[0];
   }
 
@@ -231,23 +211,14 @@ export class DatabaseStorage implements IStorage {
     await db.update(users).set({ passwordHash }).where(eq(users.id, id));
   }
 
-  async updateUserProfile(
-    id: string,
-    data: { email?: string; phone?: string }
-  ): Promise<User> {
-    const result = await db
-      .update(users)
-      .set(data)
-      .where(eq(users.id, id))
-      .returning();
+  async updateUserProfile(id: string, data: { email?: string; phone?: string }): Promise<User> {
+    const result = await db.update(users).set(data).where(eq(users.id, id)).returning();
     return result[0];
   }
 
-  // =====================================
-  // REGISTROS DE SAÚDE (NOVO CRUD)
-  // =====================================
-
-  // Lista todos os registros de saúde do usuário autenticado
+  // =====================
+  // REGISTROS DE SAÚDE
+  // =====================
   async getHealthRecords(userId: string): Promise<HealthRecord[]> {
     const result = await db
       .select()
@@ -257,11 +228,7 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  // Busca um registro específico do usuário
-  async getHealthRecord(
-    id: string,
-    userId: string
-  ): Promise<HealthRecord | undefined> {
+  async getHealthRecord(id: string, userId: string): Promise<HealthRecord | undefined> {
     const result = await db
       .select()
       .from(healthRecords)
@@ -269,19 +236,11 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  // Cria um registro de saúde vinculado ao usuário logado
-  async createHealthRecord(
-    data: InsertHealthRecord,
-    userId: string
-  ): Promise<HealthRecord> {
-    const result = await db
-      .insert(healthRecords)
-      .values({ ...data, userId })
-      .returning();
+  async createHealthRecord(data: InsertHealthRecord, userId: string): Promise<HealthRecord> {
+    const result = await db.insert(healthRecords).values({ ...data, userId }).returning();
     return result[0];
   }
 
-  // Atualiza parcialmente um registro do usuário
   async updateHealthRecord(
     id: string,
     data: Partial<InsertHealthRecord>,
@@ -295,13 +254,11 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  // Remove um registro do usuário e retorna boolean pra rota saber se existia
   async deleteHealthRecord(id: string, userId: string): Promise<boolean> {
     const result = await db
       .delete(healthRecords)
       .where(and(eq(healthRecords.id, id), eq(healthRecords.userId, userId)))
       .returning({ id: healthRecords.id });
-
     return result.length > 0;
   }
 }

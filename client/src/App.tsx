@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+
 import Home from "@/pages/Home";
 import Booking from "@/pages/Booking";
 import News from "@/pages/News";
@@ -17,19 +18,30 @@ import MyHealthRecords from "@/pages/MyHealthRecords";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/not-found";
 
+// 👇 NOVO: import da página de administração de hospitais
+import AdminHospitals from "@/pages/AdminHospitals";
+
 function Router() {
   return (
     <Switch>
+      {/* Login e rota raiz */}
       <Route path="/" component={Login} />
+      <Route path="/login" component={Login} />
+      <Route path="/criar-conta" component={CreateAccount} />
+      <Route path="/esqueci-senha" component={ForgotPassword} />
+
+      {/* Rotas principais do app logado */}
       <Route path="/home" component={Home} />
       <Route path="/agendar" component={Booking} />
       <Route path="/meus-agendamentos" component={MyAppointments} />
       <Route path="/meus-registros" component={MyHealthRecords} />
       <Route path="/noticias" component={News} />
       <Route path="/perfil" component={Profile} />
-      <Route path="/login" component={Login} />
-      <Route path="/criar-conta" component={CreateAccount} />
-      <Route path="/esqueci-senha" component={ForgotPassword} />
+
+      {/* 👇 NOVO: painel admin (CRUD de hospitais) */}
+      <Route path="/admin/hospitais" component={AdminHospitals} />
+
+      {/* Fallback 404 */}
       <Route component={NotFound} />
     </Switch>
   );
