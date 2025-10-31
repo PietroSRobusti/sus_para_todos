@@ -10,24 +10,30 @@ import {
   type InsertNews,
   type User,
   type InsertUser,
+  type HealthRecord,
+  type InsertHealthRecord,
   hospitals,
   specialties,
   appointments,
   news,
   users,
+  healthRecords,
 } from "@shared/schema";
 import { eq, and, gte, sql } from "drizzle-orm";
 
 export interface IStorage {
+  // HOSPITAIS
   getHospitals(): Promise<Hospital[]>;
   getHospital(id: string): Promise<Hospital | undefined>;
   createHospital(hospital: InsertHospital): Promise<Hospital>;
 
+  // ESPECIALIDADES
   getSpecialties(): Promise<Specialty[]>;
   getSpecialty(id: string): Promise<Specialty | undefined>;
   createSpecialty(specialty: InsertSpecialty): Promise<Specialty>;
   updateSpecialtyImage(id: string, imageUrl: string): Promise<void>;
 
+  // AGENDAMENTOS
   getAppointments(userId: string): Promise<Appointment[]>;
   getAppointment(id: string, userId: string): Promise<Appointment | undefined>;
   getAppointmentsByDate(date: Date, userId: string): Promise<Appointment[]>;
@@ -35,19 +41,35 @@ export interface IStorage {
   updateAppointment(id: string, appointment: Partial<InsertAppointment>, userId: string): Promise<Appointment>;
   deleteAppointment(id: string, userId: string): Promise<void>;
 
+  // NOTÍCIAS
   getNews(): Promise<News[]>;
   getNewsItem(id: string): Promise<News | undefined>;
   createNews(newsItem: InsertNews): Promise<News>;
   updateNewsImage(id: string, imageUrl: string): Promise<void>;
 
+  // USUÁRIOS
   createUser(user: InsertUser): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserById(id: string): Promise<User | undefined>;
   updateUserPassword(id: string, passwordHash: string): Promise<void>;
   updateUserProfile(id: string, data: { email?: string; phone?: string }): Promise<User>;
+
+  // REGISTROS DE SAÚDE (novo CRUD)
+  getHealthRecords(userId: string): Promise<HealthRecord[]>;
+  getHealthRecord(id: string, userId: string): Promise<HealthRecord | undefined>;
+  createHealthRecord(data: InsertHealthRecord, userId: string): Promise<HealthRecord>;
+  updateHealthRecord(
+    id: string,
+    data: Partial<InsertHealthRecord>,
+    userId: string
+  ): Promise<HealthRecord | undefined>;
+  deleteHealthRecord(id: string, userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
+  // ============
+  // HOSPITAIS
+  // ============
   async getHospitals(): Promise<Hospital[]> {
     return await db.select().from(hospitals);
   }
@@ -62,12 +84,18 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
+  // ============
+  // ESPECIALIDADES
+  // ============
   async getSpecialties(): Promise<Specialty[]> {
     return await db.select().from(specialties);
   }
 
   async getSpecialty(id: string): Promise<Specialty | undefined> {
-    const result = await db.select().from(specialties).where(eq(specialties.id, id));
+    const result = await db
+      .select()
+      .from(specialties)
+      .where(eq(specialties.id, id));
     return result[0];
   }
 
@@ -77,21 +105,37 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateSpecialtyImage(id: string, imageUrl: string): Promise<void> {
-    await db.update(specialties).set({ imageUrl }).where(eq(specialties.id, id));
+    await db
+      .update(specialties)
+      .set({ imageUrl })
+      .where(eq(specialties.id, id));
   }
 
+  // ============
+  // AGENDAMENTOS
+  // ============
   async getAppointments(userId: string): Promise<Appointment[]> {
-    return await db.select().from(appointments).where(eq(appointments.userId, userId));
+    return await db
+      .select()
+      .from(appointments)
+      .where(eq(appointments.userId, userId));
   }
 
-  async getAppointment(id: string, userId: string): Promise<Appointment | undefined> {
-    const result = await db.select().from(appointments).where(
-      and(eq(appointments.id, id), eq(appointments.userId, userId))
-    );
+  async getAppointment(
+    id: string,
+    userId: string
+  ): Promise<Appointment | undefined> {
+    const result = await db
+      .select()
+      .from(appointments)
+      .where(and(eq(appointments.id, id), eq(appointments.userId, userId)));
     return result[0];
   }
 
-  async getAppointmentsByDate(date: Date, userId: string): Promise<Appointment[]> {
+  async getAppointmentsByDate(
+    date: Date,
+    userId: string
+  ): Promise<Appointment[]> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
@@ -108,26 +152,44 @@ export class DatabaseStorage implements IStorage {
       );
   }
 
-  async createAppointment(appointment: InsertAppointment, userId: string): Promise<Appointment> {
-    const result = await db.insert(appointments).values({ ...appointment, userId }).returning();
+  async createAppointment(
+    appointment: InsertAppointment,
+    userId: string
+  ): Promise<Appointment> {
+    const result = await db
+      .insert(appointments)
+      .values({ ...appointment, userId })
+      .returning();
     return result[0];
   }
 
-  async updateAppointment(id: string, appointment: Partial<InsertAppointment>, userId: string): Promise<Appointment> {
-    const result = await db.update(appointments).set(appointment).where(
-      and(eq(appointments.id, id), eq(appointments.userId, userId))
-    ).returning();
+  async updateAppointment(
+    id: string,
+    appointment: Partial<InsertAppointment>,
+    userId: string
+  ): Promise<Appointment> {
+    const result = await db
+      .update(appointments)
+      .set(appointment)
+      .where(and(eq(appointments.id, id), eq(appointments.userId, userId)))
+      .returning();
     return result[0];
   }
 
   async deleteAppointment(id: string, userId: string): Promise<void> {
-    await db.delete(appointments).where(
-      and(eq(appointments.id, id), eq(appointments.userId, userId))
-    );
+    await db
+      .delete(appointments)
+      .where(and(eq(appointments.id, id), eq(appointments.userId, userId)));
   }
 
+  // ============
+  // NOTÍCIAS
+  // ============
   async getNews(): Promise<News[]> {
-    return await db.select().from(news).orderBy(sql`${news.publishedAt} DESC`);
+    return await db
+      .select()
+      .from(news)
+      .orderBy(sql`${news.publishedAt} DESC`);
   }
 
   async getNewsItem(id: string): Promise<News | undefined> {
@@ -144,13 +206,19 @@ export class DatabaseStorage implements IStorage {
     await db.update(news).set({ imageUrl }).where(eq(news.id, id));
   }
 
+  // ============
+  // USUÁRIOS
+  // ============
   async createUser(user: InsertUser): Promise<User> {
     const result = await db.insert(users).values(user).returning();
     return result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.email, email));
+    const result = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
     return result[0];
   }
 
@@ -163,9 +231,78 @@ export class DatabaseStorage implements IStorage {
     await db.update(users).set({ passwordHash }).where(eq(users.id, id));
   }
 
-  async updateUserProfile(id: string, data: { email?: string; phone?: string }): Promise<User> {
-    const result = await db.update(users).set(data).where(eq(users.id, id)).returning();
+  async updateUserProfile(
+    id: string,
+    data: { email?: string; phone?: string }
+  ): Promise<User> {
+    const result = await db
+      .update(users)
+      .set(data)
+      .where(eq(users.id, id))
+      .returning();
     return result[0];
+  }
+
+  // =====================================
+  // REGISTROS DE SAÚDE (NOVO CRUD)
+  // =====================================
+
+  // Lista todos os registros de saúde do usuário autenticado
+  async getHealthRecords(userId: string): Promise<HealthRecord[]> {
+    const result = await db
+      .select()
+      .from(healthRecords)
+      .where(eq(healthRecords.userId, userId))
+      .orderBy(sql`${healthRecords.date} DESC`);
+    return result;
+  }
+
+  // Busca um registro específico do usuário
+  async getHealthRecord(
+    id: string,
+    userId: string
+  ): Promise<HealthRecord | undefined> {
+    const result = await db
+      .select()
+      .from(healthRecords)
+      .where(and(eq(healthRecords.id, id), eq(healthRecords.userId, userId)));
+    return result[0];
+  }
+
+  // Cria um registro de saúde vinculado ao usuário logado
+  async createHealthRecord(
+    data: InsertHealthRecord,
+    userId: string
+  ): Promise<HealthRecord> {
+    const result = await db
+      .insert(healthRecords)
+      .values({ ...data, userId })
+      .returning();
+    return result[0];
+  }
+
+  // Atualiza parcialmente um registro do usuário
+  async updateHealthRecord(
+    id: string,
+    data: Partial<InsertHealthRecord>,
+    userId: string
+  ): Promise<HealthRecord | undefined> {
+    const result = await db
+      .update(healthRecords)
+      .set(data)
+      .where(and(eq(healthRecords.id, id), eq(healthRecords.userId, userId)))
+      .returning();
+    return result[0];
+  }
+
+  // Remove um registro do usuário e retorna boolean pra rota saber se existia
+  async deleteHealthRecord(id: string, userId: string): Promise<boolean> {
+    const result = await db
+      .delete(healthRecords)
+      .where(and(eq(healthRecords.id, id), eq(healthRecords.userId, userId)))
+      .returning({ id: healthRecords.id });
+
+    return result.length > 0;
   }
 }
 

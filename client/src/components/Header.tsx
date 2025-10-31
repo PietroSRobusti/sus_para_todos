@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { ThemeToggle } from "./ThemeToggle";
-import { Menu, X, Calendar, Newspaper, Home, CalendarCheck2 } from "lucide-react";
+import { Menu, X, Calendar, Newspaper, Home, CalendarCheck2, User, ClipboardList } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -8,18 +8,22 @@ export function Header() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // ✅ Novo item "Meu Perfil" adicionado aqui
   const navItems = [
     { path: "/home", label: "Início", icon: Home },
     { path: "/agendar", label: "Agendar", icon: Calendar },
     { path: "/meus-agendamentos", label: "Agendamentos", icon: CalendarCheck2 },
+    { path: "/perfil", label: "Meu Perfil", icon: User }, // 👈 novo item
     { path: "/noticias", label: "Notícias", icon: Newspaper },
+    { path: "/meus-registros", label: "Registros", icon: ClipboardList },
   ];
 
   return (
     <header className="sticky top-0 z-50 border-b bg-card">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
-          <Link 
+          {/* Logo */}
+          <Link
             href="/home"
             className="flex items-center gap-3 hover-elevate active-elevate-2 rounded-lg px-3 py-2"
             data-testid="link-home"
@@ -27,20 +31,23 @@ export function Header() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
               <span className="text-xl font-bold text-primary-foreground">SUS</span>
             </div>
-            <span className="hidden text-xl font-bold sm:inline">SUS Para Todos</span>
+            <span className="hidden text-xl font-bold sm:inline">
+              SUS Para Todos
+            </span>
           </Link>
 
+          {/* Navegação Desktop */}
           <nav className="hidden items-center gap-2 md:flex">
             {navItems.map((item) => (
-              <Link 
-                key={item.path} 
+              <Link
+                key={item.path}
                 href={item.path}
                 className={`flex items-center gap-2 rounded-lg px-4 py-2 text-lg font-medium transition-colors hover-elevate active-elevate-2 ${
                   location === item.path
                     ? "bg-primary text-primary-foreground"
                     : "text-foreground"
                 }`}
-                data-testid={`link-nav-${item.label.toLowerCase()}`}
+                data-testid={`link-nav-${item.label.toLowerCase().replace(" ", "-")}`}
               >
                 <item.icon className="h-5 w-5" />
                 {item.label}
@@ -48,6 +55,7 @@ export function Header() {
             ))}
           </nav>
 
+          {/* Ações à direita */}
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Button
@@ -57,18 +65,23 @@ export function Header() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="button-mobile-menu"
             >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
           </div>
         </div>
       </div>
 
+      {/* Menu Mobile */}
       {mobileMenuOpen && (
         <div className="border-t bg-card md:hidden">
           <nav className="mx-auto max-w-7xl space-y-1 px-4 py-4">
             {navItems.map((item) => (
-              <Link 
-                key={item.path} 
+              <Link
+                key={item.path}
                 href={item.path}
                 className={`flex items-center gap-3 rounded-lg px-4 py-3 text-lg font-medium hover-elevate active-elevate-2 ${
                   location === item.path
@@ -76,7 +89,7 @@ export function Header() {
                     : "text-foreground"
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
-                data-testid={`link-mobile-${item.label.toLowerCase()}`}
+                data-testid={`link-mobile-${item.label.toLowerCase().replace(" ", "-")}`}
               >
                 <item.icon className="h-5 w-5" />
                 {item.label}
