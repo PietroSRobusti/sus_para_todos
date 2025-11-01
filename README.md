@@ -134,6 +134,7 @@ DATABASE_URL=postgresql://usuario:senha@host:5432/sus_para_todos
 SESSION_SECRET=uma_chave_longa_e_aleatoria
 PORT=5000
 💡 Dica: você pode usar Neon Serverless ou um banco local PostgreSQL.
+
 💡 Melhor opção: mantenha a pasta .env do jeito que está, com banco de dados na nuvem.
 
 
