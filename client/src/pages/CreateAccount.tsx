@@ -170,6 +170,10 @@ export default function CreateAccount() {
                           <CheckCircle2 className={`h-3 w-3 ${hasUppercase ? 'opacity-100' : 'opacity-30'}`} />
                           <span>Uma letra maiúscula</span>
                         </div>
+                        <div className={`flex items-center gap-2 text-xs ${hasUppercase ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
+                          <CheckCircle2 className={`h-3 w-3 ${hasUppercase ? 'opacity-100' : 'opacity-30'}`} />
+                          <span>Um caractere especial</span>
+                        </div>
                         <div className={`flex items-center gap-2 text-xs ${hasNumber ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
                           <CheckCircle2 className={`h-3 w-3 ${hasNumber ? 'opacity-100' : 'opacity-30'}`} />
                           <span>Um número</span>
