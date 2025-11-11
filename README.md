@@ -1,5 +1,5 @@
 # 🏥 SUS Para Todos  
-### Sistema de Agendamento Público de Consultas e Exames.
+### Sistema de Agendamento Público de Consultas e Exames
 
 ---
 
