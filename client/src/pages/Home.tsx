@@ -72,7 +72,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">
-              Por que usar o SUS Para Todos?
+              Por que usar o HealHub?
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Facilitamos o acesso à saúde pública com tecnologia simples e

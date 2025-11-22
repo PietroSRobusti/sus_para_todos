@@ -32,7 +32,7 @@ describe("Login page", () => {
 
     // título da tela
     expect(
-      screen.getByText(/Entrar no SUS Para Todos/i)
+      screen.getByText(/Entrar no HealHub/i)
     ).toBeInTheDocument();
 
     // inputs e botões principais

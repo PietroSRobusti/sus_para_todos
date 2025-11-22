@@ -1,4 +1,4 @@
-# SUS Para Todos - Design Guidelines
+# HealHub - Design Guidelines
 
 ## Design Approach
 
@@ -19,9 +19,9 @@
 
 ### A. Color Palette
 
-**Primary Colors (SUS Brand):**
-- **Primary Green:** 142 65% 45% (SUS institutional green)
-- **Primary Blue:** 210 75% 50% (SUS complementary blue)
+**Primary Colors (HealHub Brand):**
+- **Primary Green:** 142 65% 45% (HealHub institutional green)
+- **Primary Blue:** 210 75% 50% (HealHub complementary blue)
 - **Deep Green (Dark mode primary):** 142 60% 35%
 - **Deep Blue (Dark mode accent):** 210 70% 40%
 
@@ -88,14 +88,14 @@
 ### D. Component Library
 
 **Navigation:**
-- Fixed header with SUS logo (left), main navigation links (center), user profile/accessibility controls (right)
+- Fixed header with HealHub logo (left), main navigation links (center), user profile/accessibility controls (right)
 - Large touch targets (min 48x48px)
 - High contrast against background
 - Mobile: Hamburger menu with full-screen overlay
 
 **Hero Section:**
 - Large hero image showing diverse patients in São Caetano do Sul hospital settings (generated via OpenAI/DALL-E)
-- Overlaid headline: "Agende sua Consulta ou Exame no SUS" (text-5xl, white with subtle shadow)
+- Overlaid headline: "Agende sua Consulta ou Exame no HealHub" (text-5xl, white with subtle shadow)
 - Primary CTA button: "Agendar Agora" (large, primary green, px-12 py-5)
 - Secondary info: "Atendemos todos os hospitais de São Caetano do Sul"
 - Height: 70vh with gradient overlay for text readability
@@ -159,7 +159,7 @@
 
 **Footer:**
 - Three-column layout (desktop) / stacked (mobile)
-- Column 1: SUS logo, mission statement, social media links
+- Column 1: HealHub logo, mission statement, social media links
 - Column 2: Quick links (Hospitais, Especialidades, Notícias, Contato)
 - Column 3: Contact info (Endereço, Telefone, Email, Horário de atendimento)
 - Copyright and accessibility statement at bottom

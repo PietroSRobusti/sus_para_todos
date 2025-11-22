@@ -9,9 +9,9 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-3 mb-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <span className="text-xl font-bold text-primary-foreground">SUS</span>
+                <span className="text-xl font-bold text-primary-foreground">HH</span>
               </div>
-              <span className="text-xl font-bold">SUS Para Todos</span>
+              <span className="text-xl font-bold">HealHub</span>
             </div>
             <p className="text-lg text-muted-foreground leading-relaxed mb-6">
               Sistema de agendamento de consultas e exames médicos para os hospitais de São Caetano do Sul.
@@ -72,11 +72,11 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-                <span className="text-lg text-muted-foreground">(11) 0800-SUS-0000</span>
+                <span className="text-lg text-muted-foreground">(11)0800-000-000</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-primary flex-shrink-0" />
-                <span className="text-lg text-muted-foreground">contato@susparatodos.sp.gov.br</span>
+                <span className="text-lg text-muted-foreground">contato@healhub.com.br</span>
               </li>
               <li className="flex items-start gap-3">
                 <Clock className="h-5 w-5 mt-1 text-primary flex-shrink-0" />
@@ -88,7 +88,7 @@ export function Footer() {
 
         <div className="mt-12 border-t pt-8 text-center">
           <p className="text-base text-muted-foreground">
-            © 2025 SUS Para Todos - São Caetano do Sul. Todos os direitos reservados.
+            © 2025 HealHub - São Caetano do Sul. Todos os direitos reservados.
           </p>
           <p className="mt-2 text-base text-muted-foreground">
             Site acessível conforme diretrizes WCAG 2.1 nível AAA

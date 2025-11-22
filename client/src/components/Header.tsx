@@ -62,7 +62,7 @@ export function Header() {
           {/* ESQUERDA: LOGO + MENU */}
           {/* ====================== */}
           <div className="flex min-w-0 flex-shrink items-center gap-6">
-            {/* Logo atualizado (opção 1: SUS [verde] + "Para Todos" em linha) */}
+            {/* Logo atualizado (opção 1: HH [verde] + "Para Todos" em linha) */}
             <Link
               href="/home"
               className="flex items-center gap-3 hover-elevate active-elevate-2 rounded-lg px-3 py-2"
@@ -70,11 +70,11 @@ export function Header() {
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
                 <span className="text-lg font-extrabold text-primary-foreground tracking-tight">
-                  SUS
+                  HH
                 </span>
               </div>
               <span className="hidden text-xl font-bold tracking-tight sm:inline">
-                Para Todos
+                
               </span>
             </Link>
 
