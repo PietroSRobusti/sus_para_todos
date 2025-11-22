@@ -99,7 +99,7 @@ export default function CreateAccount() {
             Criar Nova Conta
           </CardTitle>
           <CardDescription>
-            Preencha os dados abaixo para criar sua conta no SUS Para Todos
+            Preencha os dados abaixo para criar sua conta no HealHub
           </CardDescription>
         </CardHeader>
         <CardContent>

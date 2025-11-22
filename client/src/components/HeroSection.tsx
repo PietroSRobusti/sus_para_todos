@@ -9,7 +9,7 @@ export function HeroSection() {
       
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 lg:px-8">
         <h1 className="mb-6 text-5xl font-bold leading-tight text-foreground md:text-6xl">
-          Agende sua Consulta ou Exame no SUS
+          Agende sua Consulta ou Exame
         </h1>
         <p className="mx-auto mb-8 max-w-3xl text-xl leading-relaxed text-muted-foreground md:text-2xl">
           Atendemos todos os hospitais de São Caetano do Sul. Sistema fácil e acessível para todas as idades.

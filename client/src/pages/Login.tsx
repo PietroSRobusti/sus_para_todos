@@ -50,7 +50,7 @@ export default function Login() {
     onSuccess: () => {
       toast({
         title: "Login realizado!",
-        description: "Bem-vindo de volta ao SUS Para Todos.",
+        description: "Bem-vindo de volta ao HealHub.",
       });
       setLocation("/home");
     },
@@ -72,7 +72,7 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2">
           <CardTitle className="text-2xl font-bold text-center">
-            Entrar no SUS Para Todos
+            Entrar no HealHub
           </CardTitle>
           <CardDescription className="text-center">
             Digite seu e-mail e senha para acessar o sistema

@@ -1,12 +1,12 @@
-# SUS Para Todos - Healthcare Appointment System
+# HealHub Para Todos - Healthcare Appointment System
 
 ## Overview
 
-SUS Para Todos is a healthcare appointment scheduling platform designed for São Caetano do Sul's public hospital system (SUS). The application enables citizens to book medical consultations and exams across multiple hospitals with an accessibility-first approach optimized for adult and elderly users.
+HealHub Para Todos is a healthcare appointment scheduling platform designed for São Caetano do Sul's public hospital system (HealHub). The application enables citizens to book medical consultations and exams across multiple hospitals with an accessibility-first approach optimized for adult and elderly users.
 
 **Core Purpose:** Simplify access to public healthcare services through an intuitive, government-branded web application that connects patients with hospitals, medical specialties, and health information.
 
-**Target Users:** Brazilian citizens of all ages, with special emphasis on accessibility for elderly users requiring medical appointments in the SUS system.
+**Target Users:** Brazilian citizens of all ages, with special emphasis on accessibility for elderly users requiring medical appointments in the HealHub system.
 
 ## User Preferences
 
@@ -32,7 +32,7 @@ Preferred communication style: Simple, everyday language.
 - Local component state with React hooks
 
 **Design System:**
-- Custom color palette based on SUS brand colors (primary green #142 65% 45%, complementary blue #210 75% 50%)
+- Custom color palette based on HealHub brand colors (primary green #142 65% 45%, complementary blue #210 75% 50%)
 - Inter font family for high legibility
 - Accessibility-first with high contrast ratios and generous spacing
 - Dark mode support with theme toggle functionality
