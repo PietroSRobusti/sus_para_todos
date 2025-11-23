@@ -6,6 +6,13 @@ import { setupVite, serveStatic, log } from "./vite";
 import { db } from "./db";
 
 const app = express();
+
+/**
+ * ESSENCIAL PARA FUNCIONAR EM PRODUÇÃO NO RENDER
+ * Permite que cookies "secure" sejam enviados mesmo atrás do proxy HTTPS do Render.
+ */
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -23,13 +30,17 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production", // necessário para produção
+      sameSite: "lax", // recomendado para cookies em backends com SPA
     },
   })
 );
 
+/**
+ * Middleware para log de requisições API com captura de JSON.
+ */
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -71,31 +82,22 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+  // Vite só em desenvolvimento (hot reload)
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
+  const port = parseInt(process.env.PORT || "5000", 10);
 
-  // Opção universal: sem reusePort pois estava dando erro ao executar
   server.listen(
     {
       port,
-      host: process.platform === 'win32' ? '127.0.0.1' : '0.0.0.0',
-      // NÃO use reusePort no Windows
+      host: process.platform === "win32" ? "127.0.0.1" : "0.0.0.0",
     },
     () => {
       log(`serving on port ${port}`);
     }
   );
-
 })();
