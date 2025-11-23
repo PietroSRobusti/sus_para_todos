@@ -11,6 +11,13 @@ import {
   ShieldCheck,
   LogOut,
   User,
+  HelpCircle,
+  BookOpen,
+  Info,
+  Settings as SettingsIcon,
+  MessageSquare,
+  FileCheck,
+  ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -19,13 +26,10 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 export function Header() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
-  // pega o usuário logado (se sessão caiu, esse hook redireciona pro /login)
   const me = useAuthRedirect();
 
-  //
-  // Bloco de navegação principal (serviços do app)
-  //
   const navItems = [
     { path: "/home", label: "Início", icon: Home },
     { path: "/agendar", label: "Agendar", icon: Calendar },
@@ -34,7 +38,15 @@ export function Header() {
     { path: "/meus-registros", label: "Registros", icon: ClipboardList },
   ];
 
-  // Item extra só para admin
+  const helpItems = [
+    { path: "/faq", label: "FAQ", icon: HelpCircle },
+    { path: "/tutorial", label: "Tutorial", icon: BookOpen },
+    { path: "/sobre", label: "Sobre", icon: Info },
+    { path: "/feedback", label: "Feedback", icon: MessageSquare },
+    { path: "/configuracoes", label: "Configurações", icon: SettingsIcon },
+    { path: "/privacidade", label: "Privacidade", icon: FileCheck },
+  ];
+
   const adminItem =
     me && me.role === "admin"
       ? {
@@ -54,196 +66,163 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-card">
+    <header className="sticky top-0 z-50 bg-card border-b">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Linha principal da navbar */}
-        <div className="flex h-16 items-center justify-between gap-4">
-          {/* ====================== */}
-          {/* ESQUERDA: LOGO + MENU */}
-          {/* ====================== */}
-          <div className="flex min-w-0 flex-shrink items-center gap-6">
-            {/* Logo atualizado (opção 1: HH [verde] + "Para Todos" em linha) */}
-            <Link
-              href="/home"
-              className="flex items-center gap-3 hover-elevate active-elevate-2 rounded-lg px-3 py-2"
-              data-testid="link-home"
-            >
+        <div className="flex h-16 items-center justify-between">
+          
+          {/* ESQUERDA: Logo + Navegação */}
+          <div className="flex items-center gap-6">
+            <Link href="/home" className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <span className="text-lg font-extrabold text-primary-foreground tracking-tight">
-                  HH
-                </span>
+                <span className="text-lg font-extrabold text-primary-foreground">HH</span>
               </div>
-              <span className="hidden text-xl font-bold tracking-tight sm:inline">
-                
-              </span>
             </Link>
 
-            {/* Nav principal - DESKTOP */}
+            {/* NAV DESKTOP */}
             <nav className="hidden md:flex items-center gap-3">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   href={item.path}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-base font-medium transition-colors hover-elevate active-elevate-2 ${
-                    location === item.path
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground"
-                  }`}
-                  data-testid={`link-nav-${item.label
-                    .toLowerCase()
-                    .replace(" ", "-")}`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-base transition hover-elevate
+                    ${location === item.path ? "bg-primary text-primary-foreground" : "text-foreground"}
+                  `}
                 >
-                  <item.icon className="h-5 w-5 shrink-0" />
-                  <span className="whitespace-nowrap">{item.label}</span>
+                  <item.icon className="h-5 w-5" />
+                  {item.label}
                 </Link>
               ))}
             </nav>
           </div>
 
-          {/* ====================== */}
-          {/* DIREITA: AÇÕES DO USUÁRIO */}
-          {/* ====================== */}
+          {/* DIREITA: Ícones e menus */}
           <div className="hidden md:flex items-center gap-3">
-            {/* separador visual entre navegação e conta */}
-            <div className="h-6 w-px bg-border" />
 
-            {/* Admin (se admin) */}
+            {/* Admin */}
             {adminItem && (
               <Link
                 href={adminItem.path}
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-base font-medium transition-colors hover-elevate active-elevate-2 ${
-                  location === adminItem.path
-                    ? "bg-primary text-primary-foreground"
-                    : "text-foreground"
-                }`}
-                data-testid="link-nav-admin"
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition hover-elevate 
+                  ${location === adminItem.path ? "bg-primary text-primary-foreground" : "text-foreground"}
+                `}
               >
-                <adminItem.icon className="h-5 w-5 shrink-0" />
-                <span className="whitespace-nowrap">{adminItem.label}</span>
+                <adminItem.icon className="h-5 w-5" />
+                {adminItem.label}
               </Link>
             )}
 
             {/* Perfil */}
             <Link
               href="/perfil"
-              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-base font-medium transition-colors hover-elevate active-elevate-2 ${
-                location === "/perfil"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground"
-              }`}
-              data-testid="link-profile"
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition hover-elevate
+                ${location === "/perfil" ? "bg-primary text-primary-foreground" : "text-foreground"}
+              `}
             >
-              <User className="h-5 w-5 shrink-0" />
-              <span className="whitespace-nowrap">Perfil</span>
+              <User className="h-5 w-5" />
+              Perfil
             </Link>
 
             {/* Sair */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-base font-medium text-foreground hover-elevate active-elevate-2"
-              data-testid="button-logout-header"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-foreground hover-elevate transition"
             >
-              <LogOut className="h-5 w-5 shrink-0" />
-              <span className="whitespace-nowrap">Sair</span>
+              <LogOut className="h-5 w-5" />
+              Sair
             </button>
 
             {/* Tema */}
             <ThemeToggle />
+
+            {/* Menu Ajuda (dropdown) */}
+            <div className="relative">
+              <button
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-foreground hover-elevate transition"
+                onClick={() => setHelpOpen(!helpOpen)}
+              >
+                <HelpCircle className="h-5 w-5" />
+                Ajuda
+                <ChevronDown className="h-4 w-4" />
+              </button>
+
+              {helpOpen && (
+                <div className="absolute right-0 mt-2 w-60 bg-card border rounded-lg shadow-lg py-2 z-50">
+                  {helpItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-accent text-sm"
+                      onClick={() => setHelpOpen(false)}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
 
-          {/* ====================== */}
-          {/* MOBILE: THEME + MENU */}
-          {/* ====================== */}
-          <div className="flex items-center gap-2 md:hidden">
+          {/* MOBILE */}
+          <div className="md:hidden flex items-center gap-2">
             <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              data-testid="button-mobile-menu"
-            >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+            <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
+
         </div>
       </div>
 
-      {/* ====================== */}
-      {/* MENU MOBILE (md < ...) */}
-      {/* ====================== */}
+      {/* MOBILE MENU */}
       {mobileMenuOpen && (
-        <div className="border-t bg-card md:hidden">
-          <nav className="mx-auto max-w-7xl space-y-1 px-4 py-4">
-            {/* blocão A: navegação principal */}
-            {navItems.map((item) => (
+        <div className="md:hidden border-t bg-card">
+          <nav className="px-4 py-4 space-y-1">
+            {[...navItems, ...helpItems].map((item) => (
               <Link
                 key={item.path}
                 href={item.path}
-                className={`flex items-center gap-3 rounded-lg px-4 py-3 text-lg font-medium hover-elevate active-elevate-2 ${
-                  location === item.path
-                    ? "bg-primary text-primary-foreground"
-                    : "text-foreground"
-                }`}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-lg hover-elevate"
                 onClick={() => setMobileMenuOpen(false)}
-                data-testid={`link-mobile-${item.label
-                  .toLowerCase()
-                  .replace(" ", "-")}`}
               >
-                <item.icon className="h-5 w-5 shrink-0" />
-                <span className="whitespace-nowrap">{item.label}</span>
+                <item.icon className="h-5 w-5" />
+                {item.label}
               </Link>
             ))}
 
-            {/* Admin (mobile) */}
+            {/* Admin */}
             {adminItem && (
               <Link
                 href={adminItem.path}
-                className={`flex items-center gap-3 rounded-lg px-4 py-3 text-lg font-medium hover-elevate active-elevate-2 ${
-                  location === adminItem.path
-                    ? "bg-primary text-primary-foreground"
-                    : "text-foreground"
-                }`}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-lg hover-elevate"
                 onClick={() => setMobileMenuOpen(false)}
-                data-testid="link-mobile-admin"
               >
-                <adminItem.icon className="h-5 w-5 shrink-0" />
-                <span className="whitespace-nowrap">{adminItem.label}</span>
+                <adminItem.icon className="h-5 w-5" />
+                {adminItem.label}
               </Link>
             )}
 
-            {/* separador */}
-            <div className="my-2 h-px bg-border" />
-
-            {/* Perfil mobile */}
+            {/* Perfil */}
             <Link
               href="/perfil"
-              className={`flex items-center gap-3 rounded-lg px-4 py-3 text-lg font-medium hover-elevate active-elevate-2 ${
-                location === "/perfil"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground"
-              }`}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-lg hover-elevate"
               onClick={() => setMobileMenuOpen(false)}
-              data-testid="link-mobile-perfil"
             >
-              <User className="h-5 w-5 shrink-0" />
-              <span className="whitespace-nowrap">Perfil</span>
+              <User className="h-5 w-5" />
+              Perfil
             </Link>
 
-            {/* Sair mobile */}
+            {/* Sair */}
             <button
-              className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-lg font-medium text-foreground hover-elevate active-elevate-2"
               onClick={() => {
                 setMobileMenuOpen(false);
                 handleLogout();
               }}
-              data-testid="button-mobile-logout"
+              className="flex items-center gap-3 px-4 py-3 text-lg hover-elevate"
             >
-              <LogOut className="h-5 w-5 shrink-0" />
-              <span className="whitespace-nowrap">Sair</span>
+              <LogOut className="h-5 w-5" />
+              Sair
             </button>
           </nav>
         </div>

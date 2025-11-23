@@ -18,19 +18,27 @@ import MyHealthRecords from "@/pages/MyHealthRecords";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/not-found";
 
-// 👇 NOVO: import da página de administração de hospitais
+// Admin
 import AdminHospitals from "@/pages/AdminHospitals";
+
+// NOVAS PÁGINAS
+import Faq from "@/pages/faq";
+import About from "@/pages/About";
+import Tutorial from "@/pages/Tutorial";
+import Feedback from "@/pages/Feedback";
+import Settings from "@/pages/Settings";
+import Privacy from "@/pages/Privacy";
 
 function Router() {
   return (
     <Switch>
-      {/* Login e rota raiz */}
+      {/* Login e rotas públicas */}
       <Route path="/" component={Login} />
       <Route path="/login" component={Login} />
       <Route path="/criar-conta" component={CreateAccount} />
       <Route path="/esqueci-senha" component={ForgotPassword} />
 
-      {/* Rotas principais do app logado */}
+      {/* App logado */}
       <Route path="/home" component={Home} />
       <Route path="/agendar" component={Booking} />
       <Route path="/meus-agendamentos" component={MyAppointments} />
@@ -38,10 +46,18 @@ function Router() {
       <Route path="/noticias" component={News} />
       <Route path="/perfil" component={Profile} />
 
-      {/* 👇 NOVO: painel admin (CRUD de hospitais) */}
+      {/* Admin */}
       <Route path="/admin/hospitais" component={AdminHospitals} />
 
-      {/* Fallback 404 */}
+      {/* Novas páginas informativas */}
+      <Route path="/faq" component={Faq} />
+      <Route path="/sobre" component={About} />
+      <Route path="/tutorial" component={Tutorial} />
+      <Route path="/feedback" component={Feedback} />
+      <Route path="/configuracoes" component={Settings} />
+      <Route path="/privacidade" component={Privacy} />
+
+      {/* 404 */}
       <Route component={NotFound} />
     </Switch>
   );
